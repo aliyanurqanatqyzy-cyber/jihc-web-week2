@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dior Beauty | Cosmetics Collection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a class="nav-box" href="home.html">Welcome Home</a>
+            <div class="nav-links">
+                <a href="home.html" class="btn">Home</a>
+                <a href="register.html" class="btn">Registration</a>
+                <a href="users.html" class="btn">Users</a>
+                <button id="modalBtn" class="btn login-button" type="button">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="shop">
+        <div class="video-banner">
+            <video class="banner" autoplay loop muted playsinline poster="dior_main.jpg">
+                <source src="dior.mov">
+            </video>
+            <div class="video-overlay"></div>
+        </div>
+
+        <h1>New Products</h1>
+        <div class="products">
+            <div class="product">
+                <img src="dior.jpg" alt="">
+                <h2>Dior Glow Palette</h2>
+                <p>Makeup</p>
+            </div>
+            <div class="product">
+                <img src="dior_1.jpg" alt="">
+                <h2>Dior Cushion Compact</h2>
+                <p>Makeup</p>
+            </div>
+            <div class="product">
+                <img src="dior_2.jpg" alt="">
+                <h2>Dior Lip Gloss</h2>
+                <p>Lips</p>
+            </div>
+            <div class="product">
+                <img src="dior_3.jpg" alt="">
+                <h2>Miss Dior</h2>
+                <p>Fragrance</p>
+            </div>
+            <div class="product">
+                <img src="dior_4.jpg" alt="">
+                <h2>Miss Dior Body Cream</h2>
+                <p>Body care</p>
+            </div>
+            <div class="product">
+                <img src="dior_5.jpg" alt="">
+                <h2>Dior Lipstick Case</h2>
+                <p>Accessories</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="loginModal" class="popup">
+        <div class="modal">
+            <h2 id="loginTitle">Login</h2>
+            <form id="loginForm">
+                <label for="loginUsername">Username</label>
+                <input id="loginUsername" name="username" type="text" placeholder="Username" autocomplete="username" required>
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" name="password" type="password" placeholder="Password" required>
+                <button class="btn white" type="submit">Submit</button>
+                <button id="loginCloseBtn" type="button" class="btn white" >Close</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>JIHC © 2026</p>
+    </footer>
+    <div id="Modal" class="popup" >
+        <div class="modal">
+            <p id="ModalText"></p>
+            <button id="ModalCloseBtn" class="btn white" >Close</button>
+        </div>
+    </div>
+    <script src="login.js?v=5"></script>
+</body>
+</html>

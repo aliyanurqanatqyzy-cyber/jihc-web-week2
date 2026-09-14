@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a class="nav-box" href="home.html">Go Homepage</a>
+            <div class="nav-links">
+                <a href="home.html" class="btn">Home</a>
+                <a href="register.html" class="btn">Registration</a>
+                <a href="users.html" class="btn">Users</a>
+            </div>
+        </div>
+    </nav>
+    <main class="registration">
+        <h2>Registration</h2>
+        <form id="form">
+            <label for="username">Username</label>
+            <input type="text" id="username" autocomplete="username" required placeholder="Enter username">
+            <label for="password">Password</label>
+            <input autocomplete="new-password" type="password" id="password" required placeholder="Enter password">
+            <button type="submit" class="btn white">Submit</button>
+        </form>
+        <p id="message" role="status"></p>
+    </main>
+    <footer>
+        <p>JIHC © 2026</p>
+    </footer>
+    <script src="register.js?v=5"></script>
+</body>
+</html>
