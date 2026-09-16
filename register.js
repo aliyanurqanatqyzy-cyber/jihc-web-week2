@@ -1,3 +1,7 @@
+if (location.port === "3001") {
+    location.replace("http://" + location.hostname + ":3000/register.html");
+}
+
 let form = document.getElementById("form");
 let message = document.getElementById("message");
 
@@ -9,7 +13,7 @@ form.onsubmit = async function (event) {
     let user = { username: username, password: password };
 
     try {
-        let response = await fetch("http://localhost:3000/register", {
+        let response = await fetch("/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(user)
@@ -20,6 +24,6 @@ form.onsubmit = async function (event) {
             form.reset();
         }
     } catch (error) {
-        message.textContent = "Start the backend: node frontend/api.js";
+        message.textContent = "Start the backend: node backend/api.mjs";
     }
 };
