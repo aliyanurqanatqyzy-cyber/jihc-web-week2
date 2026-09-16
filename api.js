@@ -1,94 +1,146 @@
-let http = require("http");
-let fs = require("fs");
-let dataFile = __dirname + "/../backend/data.json";
+import http from 'http';
+import fs from 'fs';
+import coBody from 'co-body';
 
-function readUsers() {
-    return JSON.parse(fs.readFileSync(dataFile, "utf8"));
+let frontendFolder = import.meta.dirname + "/../frontend";
+let dataFile = import.meta.dirname + "/data.json";
+
+export function readUsers() {
+    let text = fs.readFileSync(dataFile, "utf8");
+    let users = JSON.parse(text);
+    return users;
 }
 
-function reply(response, status, data) {
-    response.writeHead(status, { "Content-Type": "application/json" });
+function saveUsers(users) {
+    let text = JSON.stringify(users, null, 2);
+    fs.writeFileSync(dataFile, text);
+}
+
+function sendJSON(response, status, data) {
+    response.statusCode = status;
+    response.setHeader("Content-Type", "application/json");
     response.end(JSON.stringify(data));
 }
 
-function showPage(request, response) {
-    let name = request.url.split("?")[0].slice(1);
-    if (name === "") {
-        name = "home.html";
-    }
-    let types = { html: "text/html", css: "text/css", js: "text/javascript",
-        jpg: "image/jpeg", mov: "video/quicktime" };
-    let type = types[name.split(".").pop()];
-
-    if (request.method !== "GET" || name.includes("/") || !type ||
-        name === "api.js" || !fs.existsSync(__dirname + "/" + name)) {
-        response.writeHead(404);
-        return response.end("Not found.");
-    }
-    let file = fs.readFileSync(__dirname + "/" + name);
-    response.writeHead(200, { "Content-Type": type, "Cache-Control": "no-store" });
-    response.end(file);
+function validUser(user) {
+    if (!user) return false;
+    if (typeof user.username !== "string") return false;
+    if (typeof user.password !== "string") return false;
+    if (user.username.trim() === "") return false;
+    if (user.password.trim() === "") return false;
+    return true;
 }
 
-let server = http.createServer(function (request, response) {
-    let url = request.url.split("?")[0];
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    if (request.method === "OPTIONS") {
-        response.writeHead(204);
-        return response.end();
+function showUsers(response) {
+    let users = readUsers();
+    let result = [];
+
+    for (let user of users) {
+        result.push({ username: user.username });
     }
 
-    let text = "";
-    request.setEncoding("utf8");
-    request.on("data", function (piece) {
-        text = text + piece;
-    });
-    request.on("end", function () {
-        try {
-            if (request.method === "GET" && url === "/users") {
-                return reply(response, 200, readUsers());
-            }
-            if (request.method !== "POST") {
-                return showPage(request, response);
-            }
-            if (url !== "/register" && url !== "/login") {
-                return reply(response, 404, { message: "Not found." });
-            }
+    sendJSON(response, 200, result);
+}
 
-            let form = JSON.parse(text);
-            if (!form || typeof form.username !== "string" || !form.username.trim() ||
-                typeof form.password !== "string" || !form.password.trim()) {
-                return reply(response, 400, { message: "Enter a username and password." });
-            }
-            let username = form.username;
-            let password = form.password;
-            let users = readUsers();
+async function register(request, response) {
+    let form = await coBody.json(request);
 
-            if (url === "/register") {
-                for (let user of users) {
-                    if (user.username == username) {
-                        return reply(response, 409, { message: "Username already exists." });
-                    }
-                }
-                users.push({ username: username, password: password });
-                fs.writeFileSync(dataFile, JSON.stringify(users, null, 2));
-                return reply(response, 201, { message: "Registered! You can now log in." });
-            }
+    if (!validUser(form)) {
+        sendJSON(response, 400, { message: "Enter a username and password." });
+        return;
+    }
 
-            for (let user of users) {
-                if (user.username == username && user.password == password) {
-                    return reply(response, 200, { message: "Hello, " + username + "!" });
-                }
-            }
-            reply(response, 401, { message: "Wrong username or password." });
-        } catch (error) {
-            reply(response, 500, { message: "Could not read the request or users file." });
+    let users = readUsers();
+    let username = form.username;
+    let password = form.password;
+
+    for (let user of users) {
+        if (user.username == username) {
+            sendJSON(response, 409, { message: "Username already exists." });
+            return;
         }
-    });
+    }
+
+    let newUser = { username: username, password: password };
+    users.push(newUser);
+    saveUsers(users);
+    sendJSON(response, 201, { message: "Registered! You can now log in." });
+}
+
+async function login(request, response) {
+    let form = await coBody.json(request);
+
+    if (!validUser(form)) {
+        sendJSON(response, 400, { message: "Enter a username and password." });
+        return;
+    }
+
+    let users = readUsers();
+    let username = form.username;
+    let password = form.password;
+
+    for (let user of users) {
+        if (user.username == username && user.password == password) {
+            sendJSON(response, 200, { message: "Hello, " + username + "!" });
+            return;
+        }
+    }
+
+    sendJSON(response, 401, { message: "Wrong username or password." });
+}
+
+function showPage(url, response) {
+    let name = url.slice(1);
+
+    if (name.startsWith("frontend/")) {
+        name = name.slice(9);
+    }
+    if (name === "" || name === "index.html") {
+        name = "home.html";
+    }
+
+    let type = "";
+    if (name.endsWith(".html")) type = "text/html";
+    if (name.endsWith(".css")) type = "text/css";
+    if (name.endsWith(".js")) type = "text/javascript";
+    if (name.endsWith(".jpg")) type = "image/jpeg";
+    if (name.endsWith(".mov")) type = "video/quicktime";
+
+    let file = frontendFolder + "/" + name;
+    if (name.includes("/") || type === "" || !fs.existsSync(file)) {
+        sendJSON(response, 404, { message: "Page not found." });
+        return;
+    }
+
+    let content = fs.readFileSync(file);
+    response.setHeader("Content-Type", type);
+    response.setHeader("Cache-Control", "no-store");
+    response.end(content);
+}
+
+let server = http.createServer(async function (request, response) {
+    let url = request.url.split("?")[0];
+    let method = request.method;
+
+    try {
+        if (method === "GET" && url === "/users") {
+            showUsers(response);
+        } else if (method === "POST" && url === "/register") {
+            await register(request, response);
+        } else if (method === "POST" && url === "/login") {
+            await login(request, response);
+        } else if (method === "GET") {
+            showPage(url, response);
+        } else {
+            sendJSON(response, 404, { message: "Not found." });
+        }
+    } catch (error) {
+        let status = error.status || 500;
+        if (error instanceof SyntaxError) status = 400;
+        sendJSON(response, status, { message: "Could not read the request or users file." });
+    }
 });
 
-server.listen(3000, function () {
+server.listen(3000, "0.0.0.0", function () {
     console.log("Open http://localhost:3000");
 });
