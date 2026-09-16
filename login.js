@@ -1,3 +1,7 @@
+if (location.port === "3001") {
+    location.replace("http://" + location.hostname + ":3000/home.html");
+}
+
 let loginModal = document.getElementById("loginModal");
 let messageModal = document.getElementById("Modal");
 let message = document.getElementById("ModalText");
@@ -21,7 +25,7 @@ loginForm.onsubmit = async function (event) {
     let user = { username: username, password: password };
 
     try {
-        let response = await fetch("http://localhost:3000/login", {
+        let response = await fetch("/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(user)
@@ -33,7 +37,7 @@ loginForm.onsubmit = async function (event) {
             loginForm.reset();
         }
     } catch (error) {
-        message.textContent = "Start the backend: node frontend/api.js";
+        message.textContent = "Start the backend: node backend/api.mjs";
     }
     messageModal.style.display = "flex";
 };
