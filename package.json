@@ -6,7 +6,6 @@
     "start": "node api.mjs"
   },
   "dependencies": {
-    "co-body": "^6.2.0",
     "pg": "^8.16.3"
   }
 }
